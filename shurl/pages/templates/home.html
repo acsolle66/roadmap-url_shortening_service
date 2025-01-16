@@ -1,2 +1,39 @@
-<h1>Hello</h1>
-<p>{{ short_url }}</p>
+{% extends 'base.html' %}
+
+{% block content %}
+  <!-- NAVIGATION -->
+  <nav class="pt-3 pb-3 mb-5 shadow-sm">
+    <div class="container-lg">
+      <div class="row align-items-center">
+        <div class="col">
+          <div class="row align-items-center">
+            <div class="col">
+              <h3 class="banner d-inline">Short<span style="color:red">.</span>URL</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- LOGIN FORM -->
+  <div class="container-lg shadow mb-5" style="max-width:736px;padding:32px">
+    <div class="container-lg p-0 mb-4">
+      <h4 class="mb-2">Get your short URL</h4>
+      <p>
+        If you already have a short code for an URL click <a class="body-link" href="#">here</a> for stats.
+      </p>
+    </div>
+
+    <div class="container-lg p-0" style="max-width:480px">
+      <form method="post">
+        <div class="form-floating mb-3">
+          <input class="form-control" id="floatingURL" placeholder="URL" type="text" name="long_url" />
+          <label for="floatingURL">Your very long URL</label>
+        </div>
+        <input class="full-width mb-3" type="submit" value="Generate" />
+      </form>
+      <p>Here is your short url {{ short_code }}</p>
+    </div>
+  </div>
+{% endblock %}

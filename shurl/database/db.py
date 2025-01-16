@@ -1,14 +1,13 @@
-# from pymongo.mongo_client import MongoClient
-# from pymongo.server_api import ServerApi
-# from settings import MONGO_URI
+from beanie import init_beanie
+from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo.server_api import ServerApi
 
-# uri = MONGO_URI
-# # Create a new client and connect to the server
-# client = MongoClient(uri, server_api=ServerApi("1"))
+from ..settings import MONGO_DB, MONGO_URI
+from ..shorten.models import URLMap
 
-# # Send a ping to confirm a successful connection
-# try:
-#     client.admin.command("ping")
-#     print("Pinged your deployment. You successfully connected to MongoDB!")
-# except Exception as e:
-#     print(e)
+
+async def database_init() -> AsyncIOMotorClient:
+    client = AsyncIOMotorClient(MONGO_URI, server_api=ServerApi("1"))
+    models = [URLMap]
+    await init_beanie(client[MONGO_DB], document_models=models)
+    return client
