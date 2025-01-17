@@ -16,9 +16,9 @@ models = [URLMap]
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.db_config = get_db_config()
-    app.client = await database_init(app.db_config, models)
+    app.db_client = await database_init(app.db_config, models)
     try:
-        ping = await app.client.admin.command("ping")
+        ping = await app.db_client.admin.command("ping")
         if ping["ok"] != 1:
             raise Exception("Problem connecting to MongoDB cluster.")
         else:
@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(e)
     yield
-    app.client.close()
+    app.db_client.close()
     logger.info("MongoDB client closed")
 
 

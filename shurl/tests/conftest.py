@@ -11,4 +11,9 @@ def test_client():
     os.environ["ENV"] = "TEST"
     with TestClient(app) as client:
         yield client
-        app.client.drop_database(app.db_config.MONGO_DB)
+
+
+@pytest.fixture(scope="function", autouse=True)
+def drop_db(test_client: TestClient):
+    yield
+    test_client.app.db_client.drop_database(app.db_config.MONGO_DB)
