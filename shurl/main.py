@@ -6,15 +6,19 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from .database.db import database_init
 from .health.router import health_router
 from .pages.router import pages
-from .settings import logger
+from .settings import get_db_config, logger
+from .shorten.models import URLMap
 from .shorten.routers import shorten
+
+models = [URLMap]
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    client: AsyncIOMotorClient = await database_init()
+    app.db_config = get_db_config()
+    app.client = await database_init(app.db_config, models)
     try:
-        ping = await client.admin.command("ping")
+        ping = await app.client.admin.command("ping")
         if ping["ok"] != 1:
             raise Exception("Problem connecting to MongoDB cluster.")
         else:
@@ -22,7 +26,7 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(e)
     yield
-    client.close()
+    app.client.close()
     logger.info("MongoDB client closed")
 
 

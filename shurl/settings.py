@@ -4,12 +4,7 @@ from pathlib import Path
 
 from environs import Env
 
-env = Env()
-env.read_env()
-
-# DATABASE
-MONGO_URI = env.str("MONGO_URI")
-MONGO_DB = env.str("MONGO_DB")
+logger = logging.getLogger("uvicorn")
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -19,4 +14,27 @@ STATIC_ROOT = os.path.join(BASE_DIR, STATIC_PATH)
 TEMPLATE_PATH = Path("pages/templates")
 TEMPLATE_ROOT = os.path.join(BASE_DIR, TEMPLATE_PATH)
 
-logger = logging.getLogger("uvicorn")
+env = Env()
+env.read_env()
+
+
+class DBConfig:
+    MONGO_URI: str
+    MONGO_DB: str
+
+
+class DevDBConfig(DBConfig):
+    MONGO_URI = env.str("MONGO_URI")
+    MONGO_DB = env.str("MONGO_DB")
+
+
+class TestDBConfig(DBConfig):
+    MONGO_URI = env.str("MONGO_TEST_URI")
+    MONGO_DB = env.str("MONGO_TEST_DB")
+
+
+def get_db_config():
+    environment = env.str("ENV", "dev").lower()
+    if environment == "test":
+        return TestDBConfig
+    return DevDBConfig

@@ -3,8 +3,7 @@ from pymongo.errors import DuplicateKeyError
 
 from ..settings import logger
 from .models import URLMap
-from .schemas import (URLMapCreate, URLMapResponse, URLMapResponseWithStats,
-                      URLMapUpdate)
+from .schemas import URLMapCreate, URLMapResponse, URLMapResponseWithStats, URLMapUpdate
 
 shorten = APIRouter(prefix="/shorten", tags=["Shorten"])
 
@@ -18,7 +17,6 @@ async def insert_url_map(url_map_create: URLMapCreate):
     short_url = URLMap(url=url_map_create.url)
     try:
         await URLMap.insert_one(short_url)
-        print(type(short_url.id))
         return short_url
     except DuplicateKeyError as e:
         logger.error(e)
