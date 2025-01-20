@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "asgi-lifespan>=2.1.0",
     "beanie>=1.29.0",
     "black>=24.10.0",
     "environs>=14.1.0",
@@ -15,5 +16,6 @@ dependencies = [
     "motor[srv]==3.4.0",
     "pymongo[srv]==4.8.0",
     "pytest>=8.3.4",
+    "pytest-asyncio>=0.25.2",
     "sqlalchemy>=2.0.37",
 ]

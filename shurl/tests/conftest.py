@@ -1,19 +1,26 @@
 import os
+from ..main import app as fastapi_app
+from httpx import AsyncClient, ASGITransport
+import pytest_asyncio
+from asgi_lifespan import LifespanManager
 
-import pytest
-from fastapi.testclient import TestClient
 
-from ..main import app
-
-
-@pytest.fixture(scope="session", autouse=False)
-def test_client():
+@pytest_asyncio.fixture(scope="session", autouse=False)
+async def app():
     os.environ["ENV"] = "TEST"
-    with TestClient(app) as client:
+    async with LifespanManager(fastapi_app) as manager:
+        yield manager.app
+
+
+@pytest_asyncio.fixture(scope="session", autouse=False)
+async def test_client(app):
+    async with AsyncClient(
+        transport=ASGITransport(app), base_url="http://test"
+    ) as client:
         yield client
 
 
-@pytest.fixture(scope="function", autouse=True)
-def drop_db(test_client: TestClient):
+@pytest_asyncio.fixture(scope="function", autouse=True)
+async def drop_db():
     yield
-    test_client.app.db_client.drop_database(app.db_config.MONGO_DB)
+    await fastapi_app.db_client.drop_database(fastapi_app.db_config.MONGO_DB)

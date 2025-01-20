@@ -3,10 +3,11 @@ from fastapi.testclient import TestClient
 
 from ..main import app
 
-test_client = TestClient(app)
+from httpx import AsyncClient
 
 
-def test_health_endpoint_response():
-    response = test_client.get("/api/health/ping")
+@pytest.mark.asyncio
+async def test_health_endpoint_response(test_client: AsyncClient):
+    response = await test_client.get("/api/health/ping")
     assert response.status_code == 200
     assert response.json().get("response") == "pong"
