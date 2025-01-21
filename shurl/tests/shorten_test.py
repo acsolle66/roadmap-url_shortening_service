@@ -76,7 +76,7 @@ async def test_get_short_url_by_short_code(test_client: TestClient):
 
 @pytest.mark.asyncio
 async def test_get_none_existent_short_url(test_client: TestClient):
-    r = await test_client.get("/api/shorten/" + "01234567")
+    r = await test_client.get(base_route + "01234567")
     assert r.status_code == 404
 
 
