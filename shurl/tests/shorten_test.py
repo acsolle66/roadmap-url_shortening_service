@@ -2,10 +2,10 @@ import random
 
 import pytest
 from fastapi.testclient import TestClient
+from pydantic import HttpUrl
 
 base_route = "/api/shorten/"
 valid_payload = {"url": "http://somelongtest.url"}
-invalid_payload = {"short_url": "http://somelongtest.url"}
 
 
 # CREATE
@@ -16,8 +16,14 @@ async def test_create_short_url_with_missing_payload(test_client: TestClient):
 
 
 @pytest.mark.asyncio
-async def test_create_short_url_with_invalid_payload(test_client: TestClient):
-    r = await test_client.post(base_route, json=invalid_payload)
+async def test_create_short_url_with_invalid_json_key(test_client: TestClient):
+    r = await test_client.post(base_route, json={"invalid": "http://somelongtest.url"})
+    assert r.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_create_short_url_with_invalid_json_data(test_client: TestClient):
+    r = await test_client.post(base_route, json={"url": "somelongtest.url"})
     assert r.status_code == 422
 
 
@@ -97,7 +103,7 @@ async def test_update_short_url_by_short_code(test_client: TestClient):
     post_json = r.json()
     short_code = post_json.get("shortCode")
     document_route = base_route + short_code
-    assert post_json.get("url") == valid_payload["url"]
+    assert post_json.get("url") == HttpUrl(valid_payload["url"]).unicode_string()
 
     # Update document and check content
     r = await test_client.put(
@@ -106,8 +112,11 @@ async def test_update_short_url_by_short_code(test_client: TestClient):
     )
     put_json = r.json()
     assert r.status_code == 200
-    assert put_json.get("url") != valid_payload["url"]
-    assert put_json.get("url") == "http://somelongupdatedtest.url"
+    assert put_json.get("url") != HttpUrl(valid_payload["url"]).unicode_string()
+    assert (
+        put_json.get("url")
+        == HttpUrl("http://somelongupdatedtest.url").unicode_string()
+    )
     assert put_json.get("createdAt") == post_json.get("createdAt")
     assert put_json.get("updatedAt") != post_json.get("updatedAt")
 
