@@ -16,18 +16,11 @@ def generate_short_code():
 class URLMap(Document):
     url: str = Field(...)
     short_code: Annotated[str, Indexed(unique=True)] = Field(
-        default_factory=generate_short_code,
-        serialization_alias="shortCode",
+        default_factory=generate_short_code
     )
-    created_at: datetime = Field(
-        default_factory=partial(datetime.now, tz=timezone.utc),
-        serialization_alias="createdAt",
-    )
-    updated_at: datetime = Field(
-        default_factory=partial(datetime.now, tz=timezone.utc),
-        serialization_alias="updatedAt",
-    )
-    acces_count: int = Field(default=0, serialization_alias="accesCount")
+    created_at: datetime = Field(default_factory=partial(datetime.now, tz=timezone.utc))
+    updated_at: datetime = Field(default_factory=partial(datetime.now, tz=timezone.utc))
+    access_count: int = Field(default=0)
 
     @before_event(Replace)
     def updated_at_field(self):

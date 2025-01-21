@@ -21,4 +21,4 @@ class URLMapResponse(BaseModel):
 
 
 class URLMapResponseWithStats(URLMapResponse):
-    acces_count: int = Field(serialization_alias="accessCount")
+    access_count: int = Field(serialization_alias="accessCount")
