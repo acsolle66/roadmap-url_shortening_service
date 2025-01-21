@@ -5,7 +5,7 @@ from functools import partial
 from typing import Annotated
 
 from beanie import Document, Indexed, Replace, before_event
-from pydantic import Field
+from pydantic import Field, HttpUrl
 
 
 def generate_short_code():
@@ -14,7 +14,7 @@ def generate_short_code():
 
 
 class URLMap(Document):
-    url: str = Field(...)
+    url: HttpUrl = Field(...)
     short_code: Annotated[str, Indexed(unique=True)] = Field(
         default_factory=generate_short_code
     )

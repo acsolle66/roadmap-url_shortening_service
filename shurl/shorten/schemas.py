@@ -1,20 +1,20 @@
 from datetime import datetime
 
 from beanie.odm.fields import PydanticObjectId
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 
 
 class URLMapCreate(BaseModel):
-    url: str = Field(...)
+    url: HttpUrl = Field(...)
 
 
 class URLMapUpdate(BaseModel):
-    url: str = Field(...)
+    url: HttpUrl = Field(...)
 
 
 class URLMapResponse(BaseModel):
     id: PydanticObjectId
-    url: str
+    url: HttpUrl
     short_code: str = Field(serialization_alias="shortCode")
     created_at: datetime = Field(serialization_alias="createdAt")
     updated_at: datetime = Field(serialization_alias="updatedAt")
