@@ -63,25 +63,25 @@ async def update_url_map(short_code: str, url_map_create: URLMapUpdate):
 
 @shorten.put(
     "/{short_code}/increase",
-    status_code=status.HTTP_204_NO_CONTENT,
+    status_code=status.HTTP_200_OK,
     responses={404: {}},
 )
-async def update_url_map(short_code: str):
+async def increment_access_count(short_code: str):
     url_map = await get_url_map(short_code)
     url_map.access_count += 1
     await url_map.replace()
-    return
+    return {"detail": url_map.access_count}
 
 
 @shorten.delete(
     "/{short_code}",
-    status_code=status.HTTP_204_NO_CONTENT,
+    status_code=status.HTTP_200_OK,
     responses={404: {}},
 )
 async def delete_url_map(short_code: str):
     url_map = await get_url_map(short_code)
     await url_map.delete()
-    return
+    return {"detail": "Deleted"}
 
 
 @shorten.get(
