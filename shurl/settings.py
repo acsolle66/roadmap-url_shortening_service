@@ -18,6 +18,11 @@ env = Env()
 env.read_env()
 
 
+class AuthConfig:
+    secret_key = env.str("SECRET_KEY")
+    access_token_expire_minutes = env.int("ACCESS_TOKEN_EXPIRE_MINUTES")
+
+
 class DBConfig:
     MONGO_URI: str
     MONGO_DB: str

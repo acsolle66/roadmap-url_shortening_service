@@ -1,10 +1,13 @@
-from fastapi import APIRouter, HTTPException, status
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, status
 from pymongo.errors import DuplicateKeyError
 
+from ..auth.models import User
+from ..auth.security import get_current_user
 from ..settings import logger
 from .models import URLMap
-from .schemas import (URLMapCreate, URLMapResponse, URLMapResponseWithStats,
-                      URLMapUpdate)
+from .schemas import URLMapCreate, URLMapResponse, URLMapResponseWithStats, URLMapUpdate
 
 shorten = APIRouter(prefix="/shorten", tags=["Shorten"])
 
@@ -14,7 +17,10 @@ shorten = APIRouter(prefix="/shorten", tags=["Shorten"])
     status_code=status.HTTP_201_CREATED,
     response_model=URLMapResponse,
 )
-async def insert_url_map(url_map_create: URLMapCreate):
+async def insert_url_map(
+    url_map_create: URLMapCreate,
+    current_user: Annotated[User, Depends(get_current_user)],
+):
     short_url = URLMap(url=url_map_create.url)
     try:
         await URLMap.insert_one(short_url)
@@ -29,7 +35,7 @@ async def insert_url_map(url_map_create: URLMapCreate):
     "/",
     status_code=status.HTTP_200_OK,
 )
-async def get_url_maps():
+async def get_url_maps(current_user: Annotated[User, Depends(get_current_user)]):
     url_maps = []
     async for result in URLMap.find_all():
         url_maps.append(URLMapResponse(**result.model_dump()))
@@ -55,7 +61,11 @@ async def get_url_map(short_code: str):
     responses={404: {}},
     response_model=URLMapResponse,
 )
-async def update_url_map(short_code: str, url_map_create: URLMapUpdate):
+async def update_url_map(
+    short_code: str,
+    url_map_create: URLMapUpdate,
+    current_user: Annotated[User, Depends(get_current_user)],
+):
     url_map = await get_url_map(short_code)
     url_map.url = url_map_create.url
     return await url_map.replace()
@@ -78,7 +88,10 @@ async def increment_access_count(short_code: str):
     status_code=status.HTTP_200_OK,
     responses={404: {}},
 )
-async def delete_url_map(short_code: str):
+async def delete_url_map(
+    short_code: str,
+    current_user: Annotated[User, Depends(get_current_user)],
+):
     url_map = await get_url_map(short_code)
     await url_map.delete()
     return {"detail": "Deleted"}
@@ -90,5 +103,8 @@ async def delete_url_map(short_code: str):
     responses={404: {}},
     response_model=URLMapResponseWithStats,
 )
-async def get_url_map_with_stats(short_code: str):
+async def get_url_map_with_stats(
+    short_code: str,
+    current_user: Annotated[User, Depends(get_current_user)],
+):
     return await get_url_map(short_code)

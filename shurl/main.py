@@ -1,8 +1,9 @@
 from contextlib import asynccontextmanager
 
 from fastapi import APIRouter, FastAPI
-from motor.motor_asyncio import AsyncIOMotorClient
 
+from .auth.models import User
+from .auth.routers import auth
 from .database.db import database_init
 from .health.router import health_router
 from .pages.router import pages
@@ -10,7 +11,7 @@ from .settings import get_db_config, logger
 from .shorten.models import URLMap
 from .shorten.routers import shorten
 
-models = [URLMap]
+models = [User, URLMap]
 
 
 @asynccontextmanager
@@ -33,6 +34,7 @@ async def lifespan(app: FastAPI):
 api = APIRouter(prefix="/api")
 api.include_router(router=health_router)
 api.include_router(router=shorten)
+api.include_router(router=auth)
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(router=api)

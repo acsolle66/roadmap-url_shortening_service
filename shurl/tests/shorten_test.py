@@ -25,17 +25,17 @@ valid_payload = {"url": faker.uri()}
 )
 @pytest.mark.asyncio
 async def test_create_short_url_with_invalid_inputs(
-    test_client: AsyncClient,
+    auth_test_client: AsyncClient,
     invalid_payload: dict[str, str],
     expected_status_code: Literal[422],
 ):
-    r = await test_client.post(base_url, json=invalid_payload)
+    r = await auth_test_client.post(base_url, json=invalid_payload)
     assert r.status_code == expected_status_code
 
 
 @pytest.mark.asyncio
-async def test_create_short_url_with_valid_payload(test_client: AsyncClient):
-    r = await test_client.post(base_url, json=valid_payload)
+async def test_create_short_url_with_valid_payload(auth_test_client: AsyncClient):
+    r = await auth_test_client.post(base_url, json=valid_payload)
     data = r.json()
     assert r.status_code == status.HTTP_201_CREATED
     assert data.get("id")
@@ -48,27 +48,30 @@ async def test_create_short_url_with_valid_payload(test_client: AsyncClient):
 
 # READ
 @pytest.mark.asyncio
-async def test_get_all_short_urls(test_client: AsyncClient):
+async def test_get_all_short_urls(auth_test_client: AsyncClient):
     # Check document count before insertion
-    r = await test_client.get(base_url)
+    r = await auth_test_client.get(base_url)
     assert r.status_code == 200
     assert len(r.json()) == 0
 
     # Populate database with random number of documents (from 1-10)
     count = random.randint(1, 10)
     for _ in range(count):
-        await test_client.post(base_url, json=valid_payload)
+        await auth_test_client.post(base_url, json=valid_payload)
 
     # Check count of generated entries
-    r = await test_client.get(base_url)
+    r = await auth_test_client.get(base_url)
     assert r.status_code == status.HTTP_200_OK
     assert len(r.json()) == count
 
 
 @pytest.mark.asyncio
-async def test_get_short_url_by_short_code(test_client: AsyncClient):
+async def test_get_short_url_by_short_code(
+    test_client: AsyncClient,
+    auth_test_client: AsyncClient,
+):
     # Populate database with one document
-    r = await test_client.post(base_url, json=valid_payload)
+    r = await auth_test_client.post(base_url, json=valid_payload)
     post_json = r.json()
     short_code = post_json.get("shortCode")
     document_route = base_url + short_code
@@ -88,15 +91,15 @@ async def test_get_none_existent_short_url_by_short_code(test_client: AsyncClien
 
 
 @pytest.mark.asyncio
-async def test_get_short_url_with_stats_by_short_code(test_client: AsyncClient):
+async def test_get_short_url_with_stats_by_short_code(auth_test_client: AsyncClient):
     # Populate database with one document
-    r = await test_client.post(base_url, json=valid_payload)
+    r = await auth_test_client.post(base_url, json=valid_payload)
     post_json = r.json()
     short_code = post_json.get("shortCode")
     document_route = base_url + short_code
 
     # Get document by short code and check access count
-    r = await test_client.get(document_route + "/stats")
+    r = await auth_test_client.get(document_route + "/stats")
     get_json = r.json()
     assert r.status_code == status.HTTP_200_OK
     assert get_json.pop("accessCount") == 0
@@ -105,16 +108,16 @@ async def test_get_short_url_with_stats_by_short_code(test_client: AsyncClient):
 
 # UPDATE
 @pytest.mark.asyncio
-async def test_update_short_url_by_short_code(test_client: AsyncClient):
+async def test_update_short_url_by_short_code(auth_test_client: AsyncClient):
     # Populate database with one document
-    r = await test_client.post(base_url, json=valid_payload)
+    r = await auth_test_client.post(base_url, json=valid_payload)
     post_json = r.json()
     short_code = post_json.get("shortCode")
     document_route = base_url + short_code
     assert post_json.get("url") == HttpUrl(valid_payload["url"]).unicode_string()
 
     # Update document and check content
-    r = await test_client.put(
+    r = await auth_test_client.put(
         document_route,
         json={"url": valid_payload["url"] + "/test"},
     )
@@ -130,45 +133,45 @@ async def test_update_short_url_by_short_code(test_client: AsyncClient):
 
 # DELETE
 @pytest.mark.asyncio
-async def test_delete_short_url_by_short_code(test_client: AsyncClient):
+async def test_delete_short_url_by_short_code(auth_test_client: AsyncClient):
     # Populate database with one document
-    r = await test_client.post(base_url, json=valid_payload)
+    r = await auth_test_client.post(base_url, json=valid_payload)
     short_code = r.json().get("shortCode")
     document_route = base_url + short_code
 
     # Check documents count before deletion
-    r = await test_client.get(base_url)
+    r = await auth_test_client.get(base_url)
     assert len(r.json()) == 1
 
     # Delete document by short code
-    r = await test_client.delete(document_route)
+    r = await auth_test_client.delete(document_route)
     assert r.status_code == status.HTTP_200_OK
     assert r.json().get("detail") == "Deleted"
 
     # Check documents count
-    r = await test_client.get(base_url)
+    r = await auth_test_client.get(base_url)
     assert len(r.json()) == 0
 
 
 # ACCESS COUNT INCREASE ENDPOINT
 @pytest.mark.asyncio
-async def test_increment_access_count_by_short_code(test_client: AsyncClient):
+async def test_increment_access_count_by_short_code(auth_test_client: AsyncClient):
     # Populate database
-    r = await test_client.post(base_url, json=valid_payload)
+    r = await auth_test_client.post(base_url, json=valid_payload)
     short_code = r.json().get("shortCode")
     document_route = base_url + short_code
 
     # Check access count before increase
-    r = await test_client.get(document_route + "/stats")
+    r = await auth_test_client.get(document_route + "/stats")
     assert r.json().get("accessCount") == 0
 
     # Call the endpoint with random number of hits (from 1-10)
     count = random.randint(1, 10)
     for i in range(count):
-        r = await test_client.put(document_route + "/increase")
+        r = await auth_test_client.put(document_route + "/increase")
         assert r.status_code == status.HTTP_200_OK
         assert r.json().get("detail") == i + 1
 
     # Check access count after increase
-    r = await test_client.get(document_route + "/stats")
+    r = await auth_test_client.get(document_route + "/stats")
     assert r.json().get("accessCount") == count
