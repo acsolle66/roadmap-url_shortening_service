@@ -24,7 +24,10 @@ https://roadmap.sh/projects/url-shortening-service
 
 ### 🖥️ Frontend
 - Minimal HTML UI with login, form for URL input
+![image](https://github.com/user-attachments/assets/c99400e3-3184-4338-b631-779c878ab4c8)
 - Displays user's shortened URLs and access counts
+![image](https://github.com/user-attachments/assets/b6690b00-828c-4dee-b6ad-983d8f88fb92)
+
 
 ## 🚀 Getting Started
 - Requires python 3.12+
