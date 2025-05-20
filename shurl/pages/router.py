@@ -12,7 +12,7 @@ from ..shorten.routers import get_url_map
 templates = Jinja2Templates(directory=TEMPLATE_ROOT)
 
 pages = APIRouter()
-pages.mount("/static", StaticFiles(directory=STATIC_ROOT), name="static")
+#pages.mount("/static", StaticFiles(directory=STATIC_ROOT), name="static")
 
 api_host = "http://127.0.0.1:8000/api"
 
