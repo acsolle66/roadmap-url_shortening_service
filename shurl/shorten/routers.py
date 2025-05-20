@@ -31,14 +31,11 @@ async def insert_url_map(
         raise HTTPException(status_code=500, detail="Duplicated keys")
 
 
-@shorten.get(
-    "/",
-    status_code=status.HTTP_200_OK,
-)
-async def get_url_maps(current_user: Annotated[User, Depends(get_current_user)]):
+@shorten.get("/", status_code=status.HTTP_200_OK)
+async def get_url_maps():
     url_maps = []
     async for result in URLMap.find_all():
-        url_maps.append(URLMapResponse(**result.model_dump()))
+        url_maps.append(URLMapResponseWithStats(**result.model_dump()))
     return url_maps
 
 
@@ -48,7 +45,9 @@ async def get_url_maps(current_user: Annotated[User, Depends(get_current_user)])
     responses={404: {}},
     response_model=URLMapResponse,
 )
-async def get_url_map(short_code: str):
+async def get_url_map(
+    short_code: str,
+):
     url_map = await URLMap.find_one(URLMap.short_code == short_code)
     if url_map is None:
         raise HTTPException(status_code=404, detail="URL not found")
@@ -77,7 +76,10 @@ async def update_url_map(
     responses={404: {}},
 )
 async def increment_access_count(short_code: str):
-    url_map = await get_url_map(short_code)
+    url_map = await URLMap.find_one(URLMap.short_code == short_code)
+    if url_map is None:
+        raise HTTPException(status_code=404, detail="URL not found")
+
     url_map.access_count += 1
     await url_map.replace()
     return {"detail": url_map.access_count}

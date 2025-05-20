@@ -6,6 +6,7 @@ import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
+from sqlalchemy import true
 
 from ..settings import AuthConfig
 from .models import User

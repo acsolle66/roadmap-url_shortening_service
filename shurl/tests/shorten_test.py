@@ -77,15 +77,15 @@ async def test_get_short_url_by_short_code(
     document_route = base_url + short_code
 
     # Get document by short code
-    r = await test_client.get(document_route)
+    r = await auth_test_client.get(document_route)
     get_json = r.json()
     assert r.status_code == status.HTTP_200_OK
     assert post_json == get_json
 
 
 @pytest.mark.asyncio
-async def test_get_none_existent_short_url_by_short_code(test_client: AsyncClient):
-    r = await test_client.get(base_url + "01234567")
+async def test_get_none_existent_short_url_by_short_code(auth_test_client: AsyncClient):
+    r = await auth_test_client.get(base_url + "01234567")
     assert r.status_code == status.HTTP_404_NOT_FOUND
     assert r.json().get("detail") == "URL not found"
 
