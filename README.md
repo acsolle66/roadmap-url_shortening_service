@@ -27,7 +27,7 @@ https://roadmap.sh/projects/url-shortening-service
 - Displays user's shortened URLs and access counts
 
 ## 🚀 Getting Started
-- Requires python 3.13+
+- Requires python 3.12+
 ### 1. Install dependencies
 `pip install -r requirements.txt`
 
